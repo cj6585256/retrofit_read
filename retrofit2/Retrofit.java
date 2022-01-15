@@ -63,6 +63,7 @@ import retrofit2.http.Url;
  * @author Bob Lee (bob@squareup.com)
  * @author Jake Wharton (jw@squareup.com)
  */
+ //门面设计模式
 public final class Retrofit {
   private final Map<Method, ServiceMethod<?>> serviceMethodCache = new ConcurrentHashMap<>();
 
@@ -145,6 +146,7 @@ public final class Retrofit {
   @SuppressWarnings("unchecked") // Single-interface proxy creation guarded by parameter safety.
   public <T> T create(final Class<T> service) {
     validateServiceInterface(service);
+	//动态代理创建一个接口的实现proxy，调用接口中的方法会走InvocationHandler
     return (T)
         Proxy.newProxyInstance(
             service.getClassLoader(),
