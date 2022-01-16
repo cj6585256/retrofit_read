@@ -58,6 +58,7 @@ import retrofit2.Retrofit;
  *       {@link Result} object for all HTTP responses and errors.
  * </ul>
  */
+ //RXJAVA请求适配器工厂
 public final class RxJava3CallAdapterFactory extends CallAdapter.Factory {
   /**
    * Returns an instance which creates asynchronous observables that run on a background thread by

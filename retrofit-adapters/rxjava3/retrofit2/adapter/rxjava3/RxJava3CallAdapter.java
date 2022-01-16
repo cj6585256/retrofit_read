@@ -25,6 +25,7 @@ import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Response;
 
+//Rxjava请求适配器
 final class RxJava3CallAdapter<R> implements CallAdapter<R, Object> {
   private final Type responseType;
   private final @Nullable Scheduler scheduler;

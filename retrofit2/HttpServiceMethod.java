@@ -27,12 +27,14 @@ import kotlin.coroutines.Continuation;
 import okhttp3.ResponseBody;
 
 /** Adapts an invocation of an interface method into an HTTP call. */
+//把一个接口方法调用适配为HTTP call对象
 abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<ReturnT> {
   /**
    * Inspects the annotations on an interface method to construct a reusable service method that
    * speaks HTTP. This requires potentially-expensive reflection so it is best to build each service
    * method only once and reuse it.
    */
+   //检查接口方法上的注释，构造可重用的HttpServiceMethod。这需要用到反射，而考虑到反射效率问题，因此最好只构造一次HttpServiceMethod并重用它
   static <ResponseT, ReturnT> HttpServiceMethod<ResponseT, ReturnT> parseAnnotations(
       Retrofit retrofit, Method method, RequestFactory requestFactory) {
     boolean isKotlinSuspendFunction = requestFactory.isKotlinSuspendFunction;
@@ -63,31 +65,33 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
       adapterType = method.getGenericReturnType();
     }
 
+	//createCallAdapter获取Retrofit构建的时候传递进来的CallAdapter
     CallAdapter<ResponseT, ReturnT> callAdapter =
         createCallAdapter(retrofit, method, adapterType, annotations);
     Type responseType = callAdapter.responseType();
-    if (responseType == okhttp3.Response.class) {
+    if (responseType == okhttp3.Response.class) { //默认的Okhttp返回类型
       throw methodError(
           method,
           "'"
               + getRawType(responseType).getName()
               + "' is not a valid response body type. Did you mean ResponseBody?");
     }
-    if (responseType == Response.class) {
+    if (responseType == Response.class) {//http返回类型
       throw methodError(method, "Response must include generic type (e.g., Response<String>)");
     }
     // TODO support Unit for Kotlin?
     if (requestFactory.httpMethod.equals("HEAD") && !Void.class.equals(responseType)) {
       throw methodError(method, "HEAD method must use Void as response type.");
     }
-
+	//Response转换器，createResponseConverter方法返回的是Retorfit构建传递的ResponseConverter
     Converter<ResponseBody, ResponseT> responseConverter =
         createResponseConverter(retrofit, method, responseType);
 
     okhttp3.Call.Factory callFactory = retrofit.callFactory;
     if (!isKotlinSuspendFunction) {
+		//创建CallAdapted
       return new CallAdapted<>(requestFactory, callFactory, responseConverter, callAdapter);
-    } else if (continuationWantsResponse) {
+    } else if (continuationWantsResponse) {//kotlin协程
       //noinspection unchecked Kotlin compiler guarantees ReturnT to be Object.
       return (HttpServiceMethod<ResponseT, ReturnT>)
           new SuspendForResponse<>(
@@ -146,7 +150,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
     Call<ResponseT> call = new OkHttpCall<>(requestFactory, args, callFactory, responseConverter);
     return adapt(call, args);
   }
-
+	//抽象方法，默认子类实现是CallAdapted
   protected abstract @Nullable ReturnT adapt(Call<ResponseT> call, Object[] args);
 
 //请求适配
@@ -164,6 +168,7 @@ abstract class HttpServiceMethod<ResponseT, ReturnT> extends ServiceMethod<Retur
 
     @Override
     protected ReturnT adapt(Call<ResponseT> call, Object[] args) {
+    //父类createCallAdapter方法创建的callAdapter
       return callAdapter.adapt(call);
     }
   }

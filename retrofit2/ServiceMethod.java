@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import javax.annotation.Nullable;
 
+//解析注解，实现类HttpServiceMethod
 abstract class ServiceMethod<T> {
   static <T> ServiceMethod<T> parseAnnotations(Retrofit retrofit, Method method) {
     RequestFactory requestFactory = RequestFactory.parseAnnotations(retrofit, method);

@@ -65,6 +65,7 @@ import retrofit2.http.Url;
  */
  //门面设计模式
 public final class Retrofit {
+//ServiceMethod缓存
   private final Map<Method, ServiceMethod<?>> serviceMethodCache = new ConcurrentHashMap<>();
 
   final okhttp3.Call.Factory callFactory;
@@ -169,7 +170,7 @@ public final class Retrofit {
               }
             });
   }
-
+	//校验定义的Retrofit接口
   private void validateServiceInterface(Class<?> service) {
     if (!service.isInterface()) {
       throw new IllegalArgumentException("API declarations must be interfaces.");
@@ -256,6 +257,7 @@ public final class Retrofit {
     Objects.requireNonNull(returnType, "returnType == null");
     Objects.requireNonNull(annotations, "annotations == null");
 
+	//skipPast默认传递为null。indexOf返回-1，+1后索引start=0
     int start = callAdapterFactories.indexOf(skipPast) + 1;
     for (int i = start, count = callAdapterFactories.size(); i < count; i++) {
       CallAdapter<?, ?> adapter = callAdapterFactories.get(i).get(returnType, annotations, this);
@@ -435,7 +437,9 @@ public final class Retrofit {
   public static final class Builder {
     private @Nullable okhttp3.Call.Factory callFactory;
     private @Nullable HttpUrl baseUrl;
+	//数据转化适配工厂集合
     private final List<Converter.Factory> converterFactories = new ArrayList<>();
+	//请求适配工厂集合
     private final List<CallAdapter.Factory> callAdapterFactories = new ArrayList<>();
     private @Nullable Executor callbackExecutor;
     private boolean validateEagerly;
@@ -626,6 +630,7 @@ public final class Retrofit {
       Platform platform = Platform.get();
 
       okhttp3.Call.Factory callFactory = this.callFactory;
+	  //callFactory目前默认都是OkHttpClient
       if (callFactory == null) {
         callFactory = new OkHttpClient();
       }
@@ -638,7 +643,8 @@ public final class Retrofit {
 
       // Make a defensive copy of the adapters and add the default Call adapter.
       List<CallAdapter.Factory> callAdapterFactories = new ArrayList<>(this.callAdapterFactories);
-      List<? extends CallAdapter.Factory> defaultCallAdapterFactories =
+		//针对platform创建不同的默认,返回是一个集合，比如Android24这个类就有两个默认的CallAdapterFactories
+	  List<? extends CallAdapter.Factory> defaultCallAdapterFactories =
           platform.createDefaultCallAdapterFactories(callbackExecutor);
       callAdapterFactories.addAll(defaultCallAdapterFactories);
 
@@ -651,7 +657,8 @@ public final class Retrofit {
 
       // Add the built-in converter factory first. This prevents overriding its behavior but also
       // ensures correct behavior when using converters that consume all types.
-      converterFactories.add(new BuiltInConverters());
+      //转化工厂集合数量+1，是为了添加一个BuiltInConverters，BuiltInConverters必须第一个添加
+      converterFactories.add(new BuiltInConverters());//kotlin支持
       converterFactories.addAll(this.converterFactories);
       converterFactories.addAll(defaultConverterFactories);
 

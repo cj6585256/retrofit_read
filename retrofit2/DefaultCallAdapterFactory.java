@@ -33,6 +33,7 @@ final class DefaultCallAdapterFactory extends CallAdapter.Factory {
     this.callbackExecutor = callbackExecutor;
   }
 
+	//通过返回类型，注解来获取CallAdapter
   @Override
   public @Nullable CallAdapter<?, ?> get(
       Type returnType, Annotation[] annotations, Retrofit retrofit) {
@@ -50,12 +51,13 @@ final class DefaultCallAdapterFactory extends CallAdapter.Factory {
             ? null
             : callbackExecutor;
 
+	//默认返回的CallAdapter
     return new CallAdapter<Object, Call<?>>() {
       @Override
       public Type responseType() {
         return responseType;
       }
-
+	//adapt后返回一个Call对象，再调用enqueue方法
       @Override
       public Call<Object> adapt(Call<Object> call) {
         return executor == null ? call : new ExecutorCallbackCall<>(executor, call);

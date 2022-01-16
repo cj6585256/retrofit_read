@@ -62,6 +62,7 @@ import retrofit2.http.QueryName;
 import retrofit2.http.Tag;
 import retrofit2.http.Url;
 
+//请求工厂，解析注解返回一个RequestFactory
 final class RequestFactory {
   static RequestFactory parseAnnotations(Retrofit retrofit, Method method) {
     return new Builder(retrofit, method).build();
@@ -79,6 +80,7 @@ final class RequestFactory {
   private final ParameterHandler<?>[] parameterHandlers;
   final boolean isKotlinSuspendFunction;
 
+//构建者模式
   RequestFactory(Builder builder) {
     method = builder.method;
     baseUrl = builder.retrofit.baseUrl;
