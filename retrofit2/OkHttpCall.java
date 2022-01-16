@@ -30,6 +30,7 @@ import okio.ForwardingSource;
 import okio.Okio;
 import okio.Timeout;
 
+//真正的Call对象
 final class OkHttpCall<T> implements Call<T> {
   private final RequestFactory requestFactory;
   private final Object[] args;
@@ -158,6 +159,7 @@ final class OkHttpCall<T> implements Call<T> {
             }
 
             try {
+				//转化后的Response回调
               callback.onResponse(OkHttpCall.this, response);
             } catch (Throwable t) {
               throwIfFatal(t);
@@ -240,6 +242,7 @@ final class OkHttpCall<T> implements Call<T> {
 
     ExceptionCatchingResponseBody catchingBody = new ExceptionCatchingResponseBody(rawBody);
     try {
+		//取到结果返回前进行response convert
       T body = responseConverter.convert(catchingBody);
       return Response.success(body, rawResponse);
     } catch (RuntimeException e) {
